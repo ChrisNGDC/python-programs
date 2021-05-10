@@ -105,26 +105,36 @@ def to_base_10_sum(numero_in, base_in):
 
 
 def to_base_2_sum(numero_primero, numero_segundo):
-    numero_primero_binario = from_base_10_to_2(numero_primero)
-    numero_segundo_binario = from_base_10_to_2(numero_segundo)
+    numero_primero_binario = from_decimal_to_base_entero(numero_primero, 2)
+    numero_segundo_binario = from_decimal_to_base_entero(numero_segundo, 2)
     numero_primero_signado = to_ten_10_signed(numero_primero_binario, signo_numero_decimal(numero_primero))
     numero_segundo_signado = to_ten_10_signed(numero_segundo_binario, signo_numero_decimal(numero_segundo))
     resultado = sumar_binario_8bits(numero_primero_signado, numero_segundo_signado)
     return to_ten_10_signed(resultado, signo_numero_binario(resultado))
 
 
-def from_base_10_to_2(numero):
+def from_decimal_to_base_entero(numero, base_out):
     if numero >= 0:
         cociente = numero
     else:
         cociente = - numero
     resultado = ""
     while cociente > 0:
-        resultado += str(cociente % 2)
-        cociente = cociente // 2
+        resultado += str(cociente % base_out)
+        cociente = cociente // base_out
     while len(resultado) < 8:
         resultado += '0'
     return invert(resultado)
+
+
+def from_decimal_to_base_fraccionario(numero, base_out):
+    resultado = ''
+    parte_fraccionaria: float = numero
+    while parte_fraccionaria > 0:
+        multiplicacion = (parte_fraccionaria * base_out)
+        resultado += str(multiplicacion // 1)
+        parte_fraccionaria = multiplicacion - multiplicacion // 1
+    return resultado + '0'
 
 
 def signo_numero_binario(numero):
@@ -142,8 +152,8 @@ def signo_numero_decimal(numero):
 
 
 def signo_suma(numero_primero, numero_segundo):
-    numero_primero_binario = from_base_10_to_2(numero_primero)
-    numero_segundo_binario = from_base_10_to_2(numero_segundo)
+    numero_primero_binario = from_decimal_to_base_entero(numero_primero, 2)
+    numero_segundo_binario = from_decimal_to_base_entero(numero_segundo, 2)
     numero_primero_signado = to_ten_10_signed(numero_primero_binario, signo_numero_decimal(numero_primero))
     numero_segundo_signado = to_ten_10_signed(numero_segundo_binario, signo_numero_decimal(numero_segundo))
     resultado = sumar_binario_8bits(numero_primero_signado, numero_segundo_signado)
@@ -165,16 +175,40 @@ def suma_decimal_8bits():
     input("Presione Enter para continuar...")
 
 
+def decimal_to_base():
+    clear_console()
+    numero_in = input("Ingrese el numero a convertir: ")
+    base_out = int(input("Ingrese la base final: "))
+    resultado = decimal_to_base_sum(numero_in, base_out)
+    print("El resultado de la conversion es: ", resultado)
+    input("Presione Enter para continuar...")
+
+
+def decimal_to_base_sum(numero_in, base_out):
+    numero_in_aux = numero_in.split(',')
+    numero_in_entero = int(numero_in_aux[0])
+    if len(numero_in_aux) == 2:
+        numero_in_fraccionario = int(numero_in_aux[1])
+    else:
+        numero_in_fraccionario = 0
+    numero_out_entero = from_decimal_to_base_entero(numero_in_entero, base_out)
+    numero_out_fraccionario = from_decimal_to_base_fraccionario(numero_in_fraccionario, base_out)
+    return numero_out_entero + ',' + numero_out_fraccionario
+
+
 def menu_options(opcion):
     if opcion == 1:
         to_base_10(),
     else:
         if opcion == 2:
             suma_decimal_8bits()
+        else:
+            if opcion == 3:
+                decimal_to_base()
 
 
 def opcion_validate(opcion):
-    return 0 < opcion < 3
+    return 0 < opcion < 4
 
 
 def main():
@@ -182,6 +216,7 @@ def main():
         clear_console()
         print("1: Pasaje de cualquier base a decimal")
         print("2: Suma de numeros decimales (signado 8 bits)")
+        print("3: Pasaje de decimal a cualquier base")
         print("0: Salir")
         opcion = int(input("Ingrese la opcion a realizar: "))
         if opcion == 0:
